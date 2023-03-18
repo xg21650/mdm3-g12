@@ -1,4 +1,6 @@
-# define salary bands
+import csv
+
+skills = ["Python", "SQL", "Excel", "data analysis", "statistics", "data visualization"]
 salary_bands = {'Less than $50,000': (0, 50000),
                 '$50,000 - $59,999': (50000, 60000),
                 '$60,000 - $69,999': (60000, 70000),
@@ -9,55 +11,50 @@ salary_bands = {'Less than $50,000': (0, 50000),
                 '$125,000 - $149,999': (125000, 150000),
                 'Above $150,000': (150000, float('inf'))}
 
-# define skills
-skills = ["Python", "SQL", "Excel", "data analysis", "statistics", "data visualization"]
+job_skills = {}  # dictionary to store the frequency of skills by job title
+salary_counts = {}  # dictionary to store the frequency of skills by salary band
 
-# initialize frequency count dictionaries for skills and salary bands
-skill_freq = {skill: 0 for skill in skills}
-salary_band_freq = {salary_band: 0 for salary_band in salary_bands}
 
-# read csv file and extract information
 with open('DataAnalyst.csv', 'r', encoding='utf-8') as file:
-    lines = file.readlines()
-    # loop over rows
-    for line in lines[1:]:
-        row = line.strip().split(',')
-        # extract job title, salary estimate, and job description
-        job_title = row[2]
-        salary_estimate = row[3]
-        job_description = row[4]
-        # categorize salary estimate into salary bands
-        salary_estimate_range = salary_estimate.split()[0]
-        salary_estimate_range = salary_estimate_range.replace('(Glassdoor est.)', '')
-        salary_estimate_min = int(salary_estimate_range.split('-')[0].replace('$', '').replace('K', '')) * 1000
-        salary_estimate_max = int(salary_estimate_range.split('-')[1].replace('$', '').replace('K', '')) * 1000
-        salary_estimate_avg = (salary_estimate_min + salary_estimate_max) / 2
-        salary_estimate_band = None
-        for band, (lower, upper) in salary_bands.items():
-            if lower <= salary_estimate_avg < upper:
-                salary_estimate_band = band
-                break
-        # count skills and salary bands for job title
+    reader = csv.reader(file)
+    next(reader)  # skip the header row
+    for row in reader:
+        job_title = row[1]
+        salary_estimate = row[2]
+        job_description = row[3]
+        salary_estimate = salary_estimate.replace(" (Glassdoor est.)", "")
+        salary_estimate = salary_estimate.replace("K", "")
+        salary_estimate = salary_estimate.replace("$", "")
+        salary_estimate = salary_estimate.replace("-", " ")
+        parts = salary_estimate.split()
+        salary_min = int(parts[0]) * 1000
+        salary_max = int(parts[1]) * 1000
+        salary_covered = set()
+        for band, (min_salary, max_salary) in salary_bands.items():
+            if salary_min <= max_salary and salary_max >= min_salary:
+                salary_covered.add(band)
         for skill in skills:
             if skill.lower() in job_description.lower():
-                skill_freq[skill] += 1
-                salary_band_freq[salary_estimate_band] += 1
+                if job_title in job_skills:
+                    job_skills[job_title][skill] = job_skills[job_title].get(skill, 0) + 1
+                else:
+                    job_skills[job_title] = {skill: 1}
+                if salary_covered:  # only count into salary bands when at least one salary band is covered
+                    for band in salary_covered:
+                        if band in salary_counts:
+                            salary_counts[band][skill] = salary_counts[band].get(skill, 0) + 1
+                        else:
+                            salary_counts[band] = {skill: 1}
 
-# print skill frequencies by salary band
-for band, (lower, upper) in salary_bands.items():
-    print(f"Salary band: {band}")
-    print(f"Skill frequencies: {skill_freq}")
-    print(f"Total jobs in salary band: {salary_band_freq[band]}")
-    print()
 
-# print skill frequencies by job title
-job_title_freq = {job_title: {skill: 0 for skill in skills} for job_title in set(job_titles)}
-for i, job_title in enumerate(job_titles):
-    for skill in skills:
-        if skill.lower() in job_descriptions[i].lower():
-            job_title_freq[job_title][skill] += 1
+# Print the results
 print("Skill frequencies by job title:")
-for job_title, skill_freq in job_title_freq.items():
-    print(f"Job title: {job_title}")
-    print(f"Skill frequencies: {skill_freq}")
-    print()
+for title, skills in job_skills.items():
+    print(f"{title}: {skills}")
+
+print("\nSkill frequencies by salary band:")
+for band, skills in salary_counts.items():
+    print(f"{band}:")
+    for skill, frequency in skills.items():
+        print(f"\t{skill}: {frequency}")
+
