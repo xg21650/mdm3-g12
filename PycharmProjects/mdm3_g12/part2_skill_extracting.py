@@ -1,6 +1,8 @@
 import csv
+import matplotlib.pyplot as plt
+import numpy as np
 
-skills = ["Python", "SQL", "Excel", "data analysis", "statistics", "data visualization"]
+skills = ["team", "statistics", "software", "research", "python", "model", "machine learning", "analyse"]
 salary_bands = {'Less than $50,000': (0, 50000),
                 '$50,000 - $59,999': (50000, 60000),
                 '$60,000 - $69,999': (60000, 70000),
@@ -47,14 +49,70 @@ with open('DataAnalyst.csv', 'r', encoding='utf-8') as file:
                             salary_counts[band] = {skill: 1}
 
 
-# Print the results
-print("Skill frequencies by job title:")
-for title, skills in job_skills.items():
-    print(f"{title}: {skills}")
-
 print("\nSkill frequencies by salary band:")
-for band, skills in salary_counts.items():
+for band, salary_range in salary_bands.items():
     print(f"{band}:")
-    for skill, frequency in skills.items():
+    for skill, frequency in salary_counts[band].items():
         print(f"\t{skill}: {frequency}")
+
+
+# Create a dictionary to store the skill counts for each salary band
+skill_counts_by_band = {band: {skill: 0 for skill in skills} for band in salary_bands}
+
+# Aggregate the skill counts for each salary band
+for band, skills in salary_counts.items():
+    for skill, count in skills.items():
+        skill_counts_by_band[band][skill] += count
+
+# Prepare the data for plotting
+x = list(salary_bands.keys())
+y = [list(skill_counts_by_band[band].values()) for band in salary_bands]
+
+# Set up the plot
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.set_title('Skill frequencies by salary band (Data Analyst)')
+ax.set_ylabel('Frequency')
+ax.set_xlabel('Salary band')
+
+# Set up the color palette
+color_palette = plt.cm.get_cmap('tab10', len(skills))
+
+# Plot each skill as a separate line
+for i, skill in enumerate(skills):
+    ax.plot(x, [y[j][i] for j in range(len(y))], marker='o', color=color_palette(i), label=skill)
+
+# Add a legend
+ax.legend(loc='best')
+
+# Show the plot
+plt.show()
+
+# Calculate total skill frequency for each salary band
+salary_totals = {}
+for band, skills in salary_counts.items():
+    salary_totals[band] = sum(skills.values())
+
+# Calculate skill frequencies as a percentage of total frequency for each salary band
+skill_percentages = {}
+for band, skills in salary_counts.items():
+    percentages = []
+    for skill, frequency in skills.items():
+        percentage = round((frequency / salary_totals[band]) * 100, 2)
+        percentages.append(percentage)
+    skill_percentages[band] = percentages
+
+# Create stacked bar chart
+plt.figure(figsize=(10, 6))
+salary_band_names = [band for band, salary_range in salary_bands.items()]
+for i, skill in enumerate(skills):
+    plt.bar(salary_band_names, [percentages[i] for percentages in skill_percentages.values()], bottom=[sum(percentages[:i]) for percentages in skill_percentages.values()], label=skill)
+
+# Move legend to the right side of the graph
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+plt.xlabel('Salary Band')
+plt.ylabel('Percentage')
+plt.title('Skill Frequencies by Salary Band (Analyst)')
+plt.show()
+
+
 
