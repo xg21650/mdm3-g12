@@ -75,16 +75,23 @@ ax.set_ylabel('Frequency')
 ax.set_xlabel('Salary band')
 
 # Set up the color palette
-color_palette = plt.cm.get_cmap('tab10', len(skills))
+color_palette = {
+    "team": "#1f77b4",
+    "statistics": "#ff7f0e",
+    "software": "#2ca02c",
+    "research": "#d62728",
+    "python": "#9467bd",
+    "model": "#8c564b",
+    "machine learning": "#e377c2",
+    "analyse": "#7f7f7f"
+}
 
 # Plot each skill as a separate line
 for i, skill in enumerate(skills):
-    ax.plot(x, [y[j][i] for j in range(len(y))], marker='o', color=color_palette(i), label=skill)
+    ax.plot(x, [y[j][i] for j in range(len(y))], marker='o', color=color_palette[skill], label=skill)
 
-# Add a legend
 ax.legend(loc='best')
-
-# Show the plot
+plt.grid(True)
 plt.show()
 
 # Calculate total skill frequency for each salary band
@@ -101,18 +108,16 @@ for band, skills in salary_counts.items():
         percentages.append(percentage)
     skill_percentages[band] = percentages
 
-# Create stacked bar chart
-plt.figure(figsize=(10, 6))
+# Create line chart for each skill
+fig, axs = plt.subplots(1, 1, figsize=(10, 8))
 salary_band_names = [band for band, salary_range in salary_bands.items()]
-for i, skill in enumerate(skills):
-    plt.bar(salary_band_names, [percentages[i] for percentages in skill_percentages.values()], bottom=[sum(percentages[:i]) for percentages in skill_percentages.values()], label=skill)
 
-# Move legend to the right side of the graph
-plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-plt.xlabel('Salary Band')
-plt.ylabel('Percentage')
-plt.title('Skill Frequencies by Salary Band (Analyst)')
+for skill in skills:
+    axs.plot(salary_band_names, [percentages[i] for percentages in skill_percentages.values() for i, s in enumerate(skills) if s == skill], marker='o', color=color_palette[skill], label=skill)
+
+axs.set_xlabel('Salary Band')
+axs.set_ylabel('Percentage')
+axs.set_title('Skill Frequencies by Salary Band (Data Analyst)')
+axs.legend(loc='upper center', bbox_to_anchor=(1.06, 0.5))
+plt.grid(True)
 plt.show()
-
-
-
