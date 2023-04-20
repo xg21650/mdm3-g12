@@ -114,7 +114,7 @@ for band, skills in salary_counts.items():
 fig, axs = plt.subplots(1, 1, figsize=(10, 8))
 salary_band_names = [band for band, salary_range in salary_bands.items()]
 
-for skill in skills:
+for i, skill in enumerate(color_palette.keys()):
     axs.plot(salary_band_names, [percentages[i] for percentages in skill_percentages.values() for i, s in enumerate(skills) if s == skill], marker='o', color=color_palette[skill], label=skill)
 
 axs.set_xlabel('Salary Band')
