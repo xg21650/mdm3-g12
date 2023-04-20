@@ -17,13 +17,13 @@ job_skills = {}  # dictionary to store the frequency of skills by job title
 salary_counts = {}  # dictionary to store the frequency of skills by salary band
 
 
-with open('DataAnalyst.csv', 'r', encoding='utf-8') as file:
+with open('Cleaned_DS_Jobs.csv', 'r', encoding='utf-8') as file:
     reader = csv.reader(file)
     next(reader)  # skip the header row
     for row in reader:
-        job_title = row[1]
-        salary_estimate = row[2]
-        job_description = row[3]
+        job_title = row[0]
+        salary_estimate = row[1]
+        job_description = row[2]
         salary_estimate = salary_estimate.replace(" (Glassdoor est.)", "")
         salary_estimate = salary_estimate.replace("K", "")
         salary_estimate = salary_estimate.replace("$", "")
@@ -84,7 +84,7 @@ y = [list(skill_counts_by_band[band].values()) for band in salary_bands]
 
 # Set up the plot
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.set_title('Skill frequencies by salary band (Data Analyst)')
+ax.set_title('Skill Frequencies by Salary Band (Data Scientist)')
 ax.set_ylabel('Frequency')
 ax.set_xlabel('Salary band')
 
@@ -119,7 +119,7 @@ for skill in skills:
 
 axs.set_xlabel('Salary Band')
 axs.set_ylabel('Percentage')
-axs.set_title('Skill Frequencies by Salary Band (Data Analyst)')
+axs.set_title('Skill Percentages by Salary Band (Data Scientist)')
 axs.legend(loc='upper center', bbox_to_anchor=(1.06, 0.5))
 plt.grid(True)
 plt.show()
