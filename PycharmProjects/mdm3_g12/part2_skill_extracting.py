@@ -17,13 +17,13 @@ job_skills = {}  # dictionary to store the frequency of skills by job title
 salary_counts = {}  # dictionary to store the frequency of skills by salary band
 
 
-with open('Cleaned_DS_Jobs.csv', 'r', encoding='utf-8') as file:
+with open('DataAnalyst.csv', 'r', encoding='utf-8') as file:
     reader = csv.reader(file)
     next(reader)  # skip the header row
     for row in reader:
-        job_title = row[0]
-        salary_estimate = row[1]
-        job_description = row[2]
+        job_title = row[1]
+        salary_estimate = row[2]
+        job_description = row[3]
         salary_estimate = salary_estimate.replace(" (Glassdoor est.)", "")
         salary_estimate = salary_estimate.replace("K", "")
         salary_estimate = salary_estimate.replace("$", "")
@@ -56,24 +56,6 @@ for band, salary_range in salary_bands.items():
         print(f"\t{skill}: {frequency}")
 """
 
-# Create a dictionary to store the skill counts for each salary band
-skill_counts_by_band = {band: {skill: 0 for skill in skills} for band in salary_bands}
-
-# Aggregate the skill counts for each salary band
-for band, skills in salary_counts.items():
-    for skill, count in skills.items():
-        skill_counts_by_band[band][skill] += count
-
-# Prepare the data for plotting
-x = list(salary_bands.keys())
-y = [list(skill_counts_by_band[band].values()) for band in salary_bands]
-
-# Set up the plot
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.set_title('Skill frequencies by salary band (Data Scientist)')
-ax.set_ylabel('Frequency')
-ax.set_xlabel('Salary band')
-
 # Set up the color palette
 color_palette = {
     "team": "#1f77b4",
@@ -88,11 +70,29 @@ color_palette = {
 
 # Sort skills based on the order of keys in color_palette dictionary
 skills = sorted(skills, key=lambda x: list(color_palette.keys()).index(x))
+# Create a dictionary to store the skill counts for each salary band
+skill_counts_by_band = {band: {skill: 0 for skill in skills} for band in salary_bands}
+
+# Aggregate the skill counts for each salary band
+for band, skills in salary_counts.items():
+    for skill, count in skills.items():
+        skill_counts_by_band[band][skill] += count
+
+# Prepare the data for plotting
+x = list(salary_bands.keys())
+y = [list(skill_counts_by_band[band].values()) for band in salary_bands]
+
+# Set up the plot
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.set_title('Skill frequencies by salary band (Data Analyst)')
+ax.set_ylabel('Frequency')
+ax.set_xlabel('Salary band')
 
 # Plot each skill as a separate line
-for i, skill in enumerate(skills):
+for i, skill in enumerate(color_palette.keys()):
     ax.plot(x, [y[j][i] for j in range(len(y))], marker='o', color=color_palette[skill], label=skill)
 ax.legend(loc='best')
+
 plt.grid(True)
 plt.show()
 
@@ -119,7 +119,7 @@ for skill in skills:
 
 axs.set_xlabel('Salary Band')
 axs.set_ylabel('Percentage')
-axs.set_title('Skill Frequencies by Salary Band (Data Scientist)')
+axs.set_title('Skill Frequencies by Salary Band (Data Analyst)')
 axs.legend(loc='upper center', bbox_to_anchor=(1.06, 0.5))
 plt.grid(True)
 plt.show()
